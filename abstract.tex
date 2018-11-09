@@ -1,0 +1,48 @@
+Solving scheduling problems
+requires two main ingredients: a model 
+that captures 
+the essence of the underlying system and an algorithm that 
+provides optimal solutions based on the model.
+Constraint programming (CP) is a well-established
+paradigm for modeling and solving deterministic
+scheduling problems.  
+It has been well-recognized that creating a suitable CP model is knowledge intensive 
+task even when the underlying system is 
+well-understood.  
+In this work, we
+aim at 
+automating
+the process of 
+modeling scheduling problems
+by learning CP models from event data.
+To this end, 
+we introduce
+a novel methodology 
+that combines process mining, 
+timed Petri nets and CP.
+As a first step, the approach
+mines
+timed Petri nets (TPNs) from event logs
+that contain
+executions of past schedules including
+information on activities, timestamps and resources.
+For the second step, 
+we define a specialized TPN type,
+namely the seize-delay-release net with 
+resources (SDRR net),
+which can be mapped into CP models. 
+We provide a correct and complete algorithm
+for detecting whether a TPN is an SDRR net.
+Furthermore, we show a
+mapping from SDRR nets into CP models.
+Our approach provides an end-to-end solution
+to model learning, going from 
+event logs to model-based optimal schedules
+without human intervention. 
+To demonstrate the usefulness 
+of the methodology we conduct
+a series of experiments in which we
+learn scheduling models from
+two types of data: (1) event logs generated from 
+job-shop scheduling benchmarks and (2) real-world event
+logs that come from an outpatient hospital. 

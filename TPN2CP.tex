@@ -1,0 +1,107 @@
+\label{TPN2CP}
+
+In this part, we present a
+transformation of schedule-driven Petri nets (SDPNs)
+to constraint programming (CP) formulations. To this end, we define
+the \emph{basic scheduling constructs set} (BSCS). Subsequently,
+we show that the BSCS can be derived from the SDPN. Lastly, we
+construct CP models from a given BSCS, thus completing the TPN2CP phase of our solution.  
+
+\subsection{The Basic Scheduling Constructs Set}
+The BSCS will contain the activities to be scheduled, the resources
+along with their capacities, precedence constraints, and 
+activity-and-resource dependent durations. In essence, the BSCS contains a set of building blocks of  
+many well-known scheduling 
+problems such as the 
+job-shop scheduling problem (JSSP), 
+and the resource-constrained project scheduling problem (RCPSP) 
+(including its multi-mode variation). To define BSCS,
+we follow the scheduling problem 
+definition introduced by~\cite{van1996petri}.
+
+\begin{mydef} [Basic Scheduling Constructs Set BSCS)] \label{def:sched}
+Basic scheduling constructs are a set $B = \{ \mathcal{A}, \mathcal{R}, \varPi, c, d \}$ over a 
+	over a finite time domain $\mathcal{T}$
+	with,
+	\begin{itemize}
+		
+		\item $\mathcal{A}$ being the set of activities to be scheduled,
+		\item $\mathcal{R}$ being the set of renewable resources,
+		\item $\varPi \subseteq \mathcal{A} \times \mathcal{A}$ being the precedence relation between pairs of activities,
+		\item $c: \mathcal{R} \rightarrow  \mathbb{N}^{+}$ being the function that maps resources to their capacities, and, 
+		\item $d: \mathcal{A} \times 2^{\mathcal{R}} \nrightarrow \mathcal{T}$ being the duration partial function that maps pairs of activities and resource sets (that can execute these activities) to values in the time domain.
+		%	and, \item $b: \mathcal{A} \times 2^{\mathcal{R}} \times \mathcal{R} \nrightarrow \mathbb{N}^{+}$ being the demand partial function for resources when 
+		%	executing an activity by a specific resource set. \todo{requires the addition of weights on the TPN!!}
+	\end{itemize}
+\end{mydef} \noindent A schedule $s$, which satisfies
+a BSCS, is an allocation of resource sets to 
+activities over time, i.e., 
+$s \in \mathcal{A} \rightarrow  (2^\mathcal{R} \times \mathcal{T})$. A feasible schedule respects 
+resource and precedence constraints. 
+Without loss of generality, one often considers an objective function 
+$\phi(s) \in \mathcal{R}^{+0}$ that 
+assigns a real-valued number to a 
+given schedule. In optimal scheduling one aims at finding a 
+schedule that minimizes 
+$\phi(s)$. In this work, we avoid learning
+the objective function of the underlying scheduling problem, and hence assume that $\phi$ is given.
+
+A prominent example that can be constructed using the BSCS is the \emph{job shop scheduling problem} (JSSP),
+where only a single resource can perform each activity (hence $d(a) , a \in \mathcal{A}$ is sufficient to represent durations),
+and resource capacities are equal to $1$. The objective function in
+JSSP is to minimize the makespan.
+
+\subsection{Deriving BSCS from SDPN}
+
+In this part, we provide a 
+mapping from Seize-Delay-Release 
+timed Petri nets with resources (SDRR nets) into 
+basic scheduling problems (BSPs). Specifically, 
+given an SDRR net, $\mathcal{N} = \langle E, E',P, F, \tau \rangle$, our
+we propose a mapping  that creates the corresponding BSP tuple, $\langle  \mathcal{A}, \mathcal{R},\varPi, c, d \rangle$.
+
+For conciseness, 
+we refer to elements of the TPN 
+(e.g., places, transitions, flows)
+when defining the BSP instead of labeling the TPN
+and then using these labels to define the BSP. \todo{not sure that this needs to be said here}
+
+For an SDRR net, we may reuse parts of
+Algorithms~\ref{Alg1} and~\ref{Alg2} to derive the following
+sets: (1) the set of SDCs $S = \{\mathcal{S}_1,\ldots,\mathcal{S}_m\}$,
+(2) the set of resource places $P_r$, (3) 
+the set of SDR nets that comprise the 
+SDRR net $N_{sdr} = \{\mathcal{N}_i\}_{i=1}^{n}$ (4) the set of 
+connector places $P_c = \{P_{c,i}\}_{i=1}^{n}$ for every SDR net
+that comprises the SDRR net, and (5) the 
+partition of SDCs, $\{C_i\}_{i=1}^{n}$, 
+which includes sets of SDCs with common 
+input and output connectors in the $i$th SDR net. 
+
+\begin{mydef}[SDRR net to BSP Mapping]
+	\begin{sloppypar} Given an SDRR net $(\mathcal{N} = (E, E', P, F, \tau), m_0)$ 
+		and the sets $S, P_r,  N_{sdr}, P_{c,i}, C_i$,
+		the BSP is constructed as follows:\end{sloppypar}
+	\begin{itemize}
+		\item The resource set is 
+		given by the set of places, $\mathcal{R} = P_r$,
+		\item The activity set corresponds to all connector places in $P_c$ except the sinks, namely $\mathcal{A} = \{p \in P_c | p\bullet \neq \emptyset \}$,
+		\item The precedence
+		relation $\varPi$ is constructed using
+		the following: $$\varPi = \{(a,b) \in \mathcal{A} \times \mathcal{A} \ | \ a \rightsquigarrow b\},$$
+		with $\rightsquigarrow$ indicating that there exists a path from $a$ to $b$,
+		\item resource capacities, $c$, are equal to the
+		initial marking
+		of resource places, i.e., $\forall r \in \mathcal{R}: c(r) = m_0(p_r)$, and finally, 
+		\item the duration (partial) function $d$ is computed as follows:
+		\begin{align*} d = & \{ (a,R,d) \in \mathcal{A} \times 2^{\mathcal{R}} \times \mathcal{T} \ | \\
+		& \forall \mathcal{S} \in S (\forall e \in E_{\mathcal{S}} \setminus E_{\mathcal{S}}'( a \in \bullet e  \ \land 
+		\ R \subseteq (\bullet e \cap \mathcal{R})) \\ &\land \forall e' \in   E_{\mathcal{S}}' (d = \tau(e')) ) \} 
+		\end{align*}	
+	\end{itemize} 
+\end{mydef}
+
+
+\subsection{From BSCS to CP Models}
+\todo{Kyle, please insert BSP to CP here. Chris will add a part on the intuition for scheduling people}
+

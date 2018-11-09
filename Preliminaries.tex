@@ -1,0 +1,109 @@
+\label{sec:preliminaries}
+
+In this section we present 
+the preliminaries to 
+our approach. Firstly, we define timed Petri nets, a special case of 
+stochastic Petri nets as defined in ~\cite[Chapter 2]{haas2002stochastic},
+having 
+deterministic activity durations and routing. 
+Secondly, we define our data model in the form of events logs and 
+briefly outline existing approaches
+for learning TPN models from event logs. We conclude the section with a
+definition of a general family of scheduling problems,
+namely \emph{basic scheduling problems} (BSP).
+
+\subsection{Timed Petri Nets}
+
+Petri nets are procedural 
+models 
+for analyzing discrete-event dynamic systems that exhibit 
+parallelism, synchronization and resource consumption.
+Formally, a timed Petri net (TPN) is defined as follows: \begin{mydef} [Timed Petri net (TPN); TPN System] \label{def:tpn}
+	A timed petri net $\mathcal{N}$ is a 
+	tuple $\mathcal{N} = \langle E, E',P, F, \tau\rangle$ with,
+	\begin{itemize}
+		\item $E$ being a finite set of transitions with $E' \subseteq E$ being a (possibly empty) set of timed transitions, 
+		\item $P$ being a finite set of places,
+		\item $F \subseteq E \times P \cup P \times E $ being the flow relation of the Petri net, and, 
+		\item $\tau \in (E' \rightarrow \mathcal{T})$ being a function that maps deterministic durations
+		to timed transitions;
+	\end{itemize} 
+\end{mydef} A TPN is fully characterized as 
+a pair $(\mathcal{N}, m_0)$ with $\mathcal{N}$ being the net and $m_0: P \rightarrow \mathbb{N}$ being an initial marking of the net, which is a 
+function that maps each place to the number of tokens that it contains. We use Figure X to demonstrate a TPN and its dynamic behavior. In the figure, we observe two jobs waiting in the queue place.... \todo{Insert simple (not too simple) TPN example here to explain the dynamics} We denote $\bullet p$ ($\bullet e$) the set of
+transitions (places) that precede a place $p$ (a transition $e$), and by $p \bullet$ the 
+set of transitions (places) that succeed a place $p$ (a transition $e$). 
+Furthermore, we define $F_P$ to be the 
+set of incoming and outgoing flows the 
+corresponds to a set of places $P$, i.e.,
+$F_P = \{(x,y) \in F \ |\ x \in P \ \lor \ y \in P \}$.
+
+
+For example,
+in Figure X $\bullet p_3$... \todo{complete here} 
+
+%
+%The set of input (output) places is 
+%denoted $P_{input} \subseteq P$ ($P_{output} \subseteq P$), such that $\forall p \in P_{input} \ (\bullet p = \emptyset)$ ($\forall p \in P_{output} \ (p\bullet = \emptyset))$). We shall assume that $|P_{input}|>0$ and $|P_{output}|>0$ (TPN has at least a single input and a single output). Also, we assume that $|e\bullet|>1$ and $|\bullet e|>1$ (every transition is followed and preceded by at least one place). Finally, the structural part of the TPN ($\mathcal{N}$) can be represented by a graph, $\mathcal{G}(\mathcal{N}) = (P \cup T, F)$, with $P \cup T$ being its nodes, and $F$ being its edges.
+ 
+TPNs were previously applied
+to model scheduling problems~\cite{van1996petri,lee1994scheduling}. 
+However, they provide an inefficient solution platform for solving scheduling
+problems,
+since TPNs require a 
+global search over 
+the entire state-space
+of the underlying problem~\cite{lee1994scheduling}. 
+Therefore, 
+previous literature on scheduling with Petri nets mostly
+focuses on heuristic solutions~\cite{lee1994scheduling}.
+
+\subsection{Mining Timed Petri nets from Event Logs}
+
+Process mining is a rapidly evolving research field 
+that is centered around developing methodologies
+for learning models from data~\cite{AalstBook}.
+The assumption is that the execution of processes
+is recorded into event logs, which can in turn be employed 
+to learn models of the underlying system
+(e.g., in the form of a Petri net). The learning
+task is typically assumed to be unsupervised, since 
+the learned model cannot be validated against ground truth. 
+
+To define process learning, we must first give an overview of
+our data model, namely the event log. 
+Let $\mathcal{E}$ be the universe of events
+with $e \in \mathcal{E}$ having attributes $e.j$ for 
+job identifier, $e.s$ for start of operation 
+timestamp, $e.c$ for completion of operation timestamp, 
+$e.R$ for resource and $e.A$ for event label (e.g., operation 3 start, operation 5 complete, operation 7 start). 
+An event log $L$ is a subset of $\mathcal{E}$. 
+Figure Y presents an excerpt from a real-world event log
+of an outpatient cancer hospital. Furthermore,
+we let $\psi(L,M) \in [0,1]$ be a learning
+quality function that given
+an event log $L$ and a TPN $M$ evaluates the model 
+with $0$ ($1$) indicating low (high) quality model
+with respect to the log. 
+
+The task of a process learning function $\gamma$ that maps 
+an event log $L$ onto a Petri net model $M$ (in our case a TPN)
+such that $\psi(L,\gamma(L))$ is minimized~\cite{AalstBook}. 
+The measure $\psi$ measures the distance
+between model and log indirectly,
+since we do not assume to have labeled pairs of logs and models.
+Many process learning algorithms were proposed in the past. See Chapter X
+in~\cite{AalstBook} for a survey.
+
+In this work, we learn TPNs using the
+approach developed 
+for scheduled processes~\cite{DBLP:conf/bpm/SenderovichRGMM15}.
+Specifically, the method in~\cite{DBLP:conf/bpm/SenderovichRGMM15} learns
+the various components of the TPN, 
+while guaranteeing maximal quality value, assuming
+that the event log was generated by 
+a process that followed a pre-defined schedule.
+\todo{Should we add more details here? no options between operations and loops are allowed}
+ 
+
+

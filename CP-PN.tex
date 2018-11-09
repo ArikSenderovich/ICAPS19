@@ -1,0 +1,797 @@
+
+\documentclass[11pt]{article}
+
+\usepackage{setspace}
+\onehalfspacing
+%\usepackage{mathtools}
+\usepackage[ruled]{algorithm2e}
+\newcommand{\todo}[1]{\textcolor{red}{\bf {#1}}}
+
+\usepackage[a4paper]{geometry}
+\setlength{\textwidth}{6in}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage[final]{pdfpages}
+%\bibpunct{}{}{}{}{,}{;}
+\pagestyle{plain}
+%\usepackage{times}
+
+\usepackage{graphicx,color}
+\usepackage{amssymb, amsmath, amsthm, amsfonts} 
+\usepackage{caption}
+\usepackage{subfigure}
+\usepackage{microtype,booktabs}
+\usepackage{mathabx}
+\usepackage{paralist,tabularx}
+\usepackage[pagebackref=true]{hyperref}
+%\usepackage{combine}
+\hypersetup{colorlinks=true}
+\usepackage{import}
+\usepackage[ruled]{algorithm2e}
+%\graphicspath{{./figures/}}
+\graphicspath{{./figures/}{./figures/Paper1/}{.Paper1/figures/}}
+\setcounter{tocdepth}{4}
+\newtheorem{mydef}{Definition}
+\newtheorem{myprop}{Proposition}
+\usepackage{url}
+\usepackage{balance}
+%\usepackage{graphicx, color}
+\newcommand\Item[1][]{%
+	\ifx\relax#1\relax  \item \else \item[#1] \fi
+	\abovedisplayskip=0pt\abovedisplayshortskip=0pt~\vspace*{-\baselineskip}}
+\usepackage{booktabs}
+
+
+%\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+%\usepackage[ruled]{algorithm2e}
+\graphicspath{{./Figures/}}
+\newtheorem{prob}{Problem}
+\newtheorem{mycor}{Corollary}
+\newtheorem{mythm}{Theorem}
+\newtheorem{myrem}{Remark}
+\newtheorem{mylemm}{Lemma}
+\newtheorem{myRun}{Running Example}
+\DeclareMathOperator{\tot}{total}
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\argmin}{argmin}
+
+
+
+	\title{\LARGE Data-Driven Scheduling Project: CP-PN}
+	\author{}
+	\date{\today}
+	
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+Explanation as to why Petri nets are suitable representations of data, yet do not provide 
+a suitable modeling language for the underlying scheduling problem(s).
+
+Convey the main idea of Data into PN into CP.
+
+
+%Petri nets are suitable to model resource dependencies and precedence constraints, which 
+%are aspects that are difficult to elicit for scheduling modelers. 
+%
+%
+%Typically, all inputs for a scheduling problem are given. However,
+%often times the underlying system/process parameters
+%are underspecified. With the right data, these parameters can be learned.
+%Therefore, we transform transactional data into a PN that is then used as the "domain description" (domain as in Planning, not CP). 
+%
+%On top of the PN, we are given
+%an underspecified scheduling problem (e.g., problem description 
+%that 
+%does not include precedence, resource 
+%consumption, `real' processing times, etc.). We then
+%exploit the learned Petri net to construct a fully specified problem
+%and solve it using CP (deterministic approach for now).
+%Solving the scheduling problem directly on the Petri net can be 
+%an alternative -need to show experimentally that CP is better. 
+
+%PN model systems and complex processes. These models can be discovered from the data. 
+%One aims at scheduling resources in these complex processes. Resource-activity relations 
+%are naturally captured by PN. We start with PN model, convert it to the corresponding Scheduling problem, and solve it.
+%Alternative: use the PN directly. Explain why this is `worse'.
+
+
+
+%\todo{can be extended to SPN for Queueing Network modeling (and scheduling) for stochastic problems. Interestingly, 
+%	may require a different approach than what follows. May need to explain Petri net semantics.} 
+
+\section{Motivating Examples}
+
+
+
+
+\subsection{The Resource-Constrained Project Scheduling Problem}
+
+
+\subsection{The Rooming Problem in Dana-Farber Cancer Institute}
+
+
+
+\section{Preliminaries}
+
+In this section we present 
+the main two preliminaries for 
+our work. Firstly, we define timed Petri nets, a special case of 
+stochastic Petri nets as defined in ~\cite[Chapter 2]{haas2002stochastic},
+having 
+deterministic activity durations and routing. Secondly, we define a family of scheduling problems,
+namely \emph{basic scheduling problems} (BSP).
+
+\subsection{Timed Petri Nets}
+Formally, a timed Petri net (TPN) is defined as follows. 
+
+\begin{mydef} [Timed Petri net (TPN); TPN System] \label{def:tpn}
+	A timed petri net $\mathcal{N}$ is a 
+	tuple $\mathcal{N} = (E, E',P, F, \tau)$ with,
+	\begin{itemize}
+		\item $E$ being a finite set of transitions with $E' \subseteq E$ being a (possibly empty) set of timed transitions, 
+		\item $P$ being a finite set of places,
+		\item $F \subseteq E \times P \cup P \times E $ being the flow relation of the Petri net, and, 
+		\item $\tau \in (E' \rightarrow \mathcal{T})$ being a function that maps deterministic durations
+		to timed transitions;
+	\end{itemize} A TPN system is a pair $(\mathcal{N}, m_0)$ with $\mathcal{N}$ being the structural part of the system, and $m_0: P \rightarrow \mathbb{N}$ being an initial marking of the net. 
+\end{mydef} \noindent Note that the time domain $\mathcal{T}$ corresponds to 
+Definition~\ref{def:sched}. We denote $\bullet p$ ($\bullet e$) the set of
+transitions (places) that precede a place $p$ (a transition $e$), and by $p \bullet$ the 
+set of transitions (places) that succeed a place $p$ (a transition $e$). 
+
+The set of input (output) places is 
+denoted $P_{input} \subseteq P$ ($P_{output} \subseteq P$), such that $\forall p \in P_{input} \ (\bullet p = \emptyset)$ ($\forall p \in P_{output} \ (p\bullet = \emptyset))$). We shall assume that $|P_{input}|>0$ and $|P_{output}|>0$ (TPN has at least a single input and a single output). Also, we assume that $|e\bullet|>1$ and $|\bullet e|>1$ (every transition is followed and preceded by at least one place). Finally, the structural part of the TPN ($\mathcal{N}$) can be represented by a graph, $\mathcal{G}(\mathcal{N}) = (P \cup T, F)$, with $P \cup T$ being its nodes, and $F$ being its edges.
+
+How process mining learns TPNs from data (existing work on precedence mining, resource mining etc.)
+
+\todo{Add explanation on Petri net semantics}
+
+
+%
+%\begin{proof}~\\
+%\textbf{Case True}: The proof is straightforward. Line 11 verifies that every Petri net represented by $\{G_i\}_{i=1}^{m}$
+%is an SD-net (by comparing every $G_i$ to Definition~\ref{def:sdnet}). This satisfies the first property
+%of an SDR decomposition. Line 12 makes sure that $P_j$ and $P_r$ as returned by \emph{CandidateJobConnectorsResources()} satisfy properties 3,4 of an SDR decomposition, by checking the conditions on input and output sets in the original net ($\mathcal{N}$). Line 14 constructs a complete decomposition using SD constructs $\{G_i\}_{i=1}^{m}$ as $\mathcal{N}_1, \ldots, \mathcal{N}_{n-2}$ (with $n = m+2$ since we add two additional nets for job connectors and resource places). It also creates $\mathcal{N}_r$ and $\mathcal{N}_j$ with only place sets (no transitions), thus satisfying property 2 of SDR decomposition. The decomposition is complete with respect to $F_D = F_j\cup F_r$ due to equations 3-5 (no additional flows introduced). Since the decomposition is complete and SDR, the TPN is an SDR-Net.
+%
+%\todo{Add algorithm for the missing functions}
+%
+%
+%
+%\textbf{Case False:}
+%We prove by contradiction. Assume for the sake of contradiction that Algorithm~\ref{Alg1} returns False, 
+%yet $\mathcal{N}$ is an SDR-TPN. Since the TPN is SDR-TPN, there exists a decomposition $D_{sdr}'((\mathcal{N}, m_0)) = \{(\mathcal{N}_1', m_0^1), \ldots, (\mathcal{N}_n', m_0^{n-2}) , (\mathcal{N}_r', m_0^{r}), (\mathcal{N}_j', m_0^{j})$ such that the conditions (1-4) in Definition~\ref{def:sdr-tpn} hold. We denote $P_j'$ and $P_r'$ the job connector places
+%and the resources places of $D_{sdr}'$. 
+%
+%If the algorithm returned False, then one of the following 
+%conditions must hold:
+%\begin{itemize}
+%	\item[C1.] One of the Petri nets represented by $\{G_i\}_{i=1}^m$ that was returned by \emph{ConnectedComponenets()} is not an SD net, or, 
+%	\item[C2.] One of the sets $P_j, P_r$ returned by \emph{CandidateJobConnectorsResources()} is not a job connector set or a resource set, respectively.
+%\end{itemize}
+
+
+%
+%First, we prove that C1 leads to a contradiction. We consider the sets $P_j$ and $P_r$ as they are returned by $\emph{CandidateJobConnectorsResources()}$.
+%All places of $\mathcal{N}$ that have a single immediate transition as their input transitions, and a single timed transition as their output transitions 
+%will not be contained in $P_j$ and $P_r$, yet these places will reside in $P_{sd}$ (line 6 of Algorithm~\ref{Alg1}). Hence, every place in $P_{sd}$, 
+%will have a 
+
+
+%
+%
+%Let $G_i \in \{G_i\}_{i=1}^m$ be the graph
+%representation of a Petri net that violates the SD condition. Since the undirected version of $G_i$ is a connected component, then
+%$G$ represents a fully connected Petri net. To violate the SD condition, one of the following SD violations must hold:
+%\begin{itemize}
+%	\item [V1] There is one place in $P_i$, yet there is at least a single redundant transition $e'' \in E_i$ in the set of transitions of $G_i$. 
+%	since $G_i$ is connected, 
+%	there is at least one $(x,y)\in F_i \ | x = e'' \lor y = e''$. If $|P_i|=1$ 
+%	(single place), then $e''$ is connected to $p \in P_i$. 
+%\end{itemize} 
+
+
+%
+%
+%We know that the alg returned false if the connected component is not sd, or it is sd but the places pj and pr do not correspond to the original places.
+%
+%
+%
+%
+%\end{proof}
+
+
+\subsection{Basic Scheduling Problems}
+ 
+In this part, we define
+a family of scheduling problems that we
+refer to as basic scheduling problems (BSPs). (Note: we consider only deterministic
+scheduling problems, at this point.)
+
+The BSP is adapted in its expressiveness to 
+to Timed Petri nets, which we use in order
+to model the data. The BSP covers a broad spectrum of scheduling problems as it 
+generalizes the 
+job-shop scheduling problem (JSP), 
+and the resource-constrained project scheduling problem (RCPSP) (including its multi-mode variation).
+
+\begin{mydef} [Basic Scheduling Problem (BSP)] \label{def:sched}
+A basic scheduling problem is a tuple $\langle  \mathcal{A}, \mathcal{R}, \varPi, c, \rho, d, b \rangle$ over a 
+over a finite time 
+with,
+\begin{itemize}
+ 
+	\item $\mathcal{A}$ being the set of activities,
+	\item $\mathcal{R}$ being the set of renewable resources,
+	\item $\varPi \subseteq \mathcal{A} \times \mathcal{A}$ being the precedence relation between activities,
+	\item $c: \mathcal{R} \rightarrow  \mathbb{N}^{+}, r \in \mathcal{R}$ being the function that maps resources to their capacities, 
+	\item $\rho: \mathcal{A} \rightarrow 2^{\mathcal{R}}$ being the resource to activity assignment (RTAA)  function that maps activities
+	to sets of resources, 
+	\item $d: \mathcal{A} \times 2^{\mathcal{R}} \nrightarrow \mathcal{T}$ being the duration partial function that maps pairs of activities and resource sets to values in the time domain, 
+	and, \item $b: \mathcal{A} \times 2^{\mathcal{R}} \times \mathcal{R} \nrightarrow \mathbb{N}^{+}$ being the demand partial function for resources when 
+		executing an activity by a specific resource set. \todo{requires the addition of weights on the TPN!!}
+\end{itemize}
+\end{mydef} \noindent A schedule $s$, which is a solution to 
+the BSP, comprises an allocation of resource sets to 
+activities over time, i.e., 
+$s \in \mathcal{A} \rightarrow  (2^\mathcal{R} \times \mathcal{T})$. A feasible schedule respects resource and precedence constraints. Without loss of generality, one often considers a score function 
+$\phi(s) \in \mathcal{R}^{+0}$ that 
+assigns a real-valued number to a 
+given schedule. We would often seek a 
+schedule that minimizes 
+$\phi(s)$.
+
+It is trivial to see that the 
+\emph{Resource-Constrained Project Scheduling Problem} 
+(RCPSP) with renewable resources \cite{BRUCKER1993} is a 
+special case of the BSP. By setting $\rho(a)$ to return singleton subsets (one
+set of resources is chosen to perform an activity)
+of renewable resource sets $\mathcal{R}$, and taking
+$\phi(\cdot)$ to be the makespan, we arrive at the definition of 
+RCPSP as it is presented in~\cite{BRUCKER1993}. 
+
+Furthermore, without constraining $\rho(a)$ to return singletons, 
+every element in $\rho(a)$ can be mapped to a unique 
+mode per activity, which leads to a more general problem, namely
+the multi-model RCPSP (MMRCPSP).
+
+
+
+\section{Timed Petri Net Decompositions}
+
+%In what follows, we shall assume that the graph is connected, in the sense that there is a path from every input place to at least one output place. \todo{this can be formalized by defining a closure and assuming that the graph is strongly connected.} 
+%
+
+In this section, we present the notion of decompositions for Petri nets.
+Specifically, we consider decompositions that will enable us to 
+map a timed Petri net into a basic scheduling problem.
+
+We start with the notion of complete TPN decomposition. 
+Then, we introduce a special case of the complete decomposition, 
+namely the \emph{seize-delay-release} (SDR) decomposition. Figure~\ref{def:sdr-tpn}
+will serve as a running example for this part.
+
+\begin{figure}[t!]
+	\centering
+	\includegraphics[scale=0.8]{SDR_TPN_ex1_crop.pdf}
+	\caption{Seize-Delay-Release Net (Definition~\ref{def:sdr-tpn})}
+	\label{fig:sdr-net}  
+	%  \vspace{-1em}
+\end{figure}
+\begin{mydef} [Complete Decomposition of TPN] \label{def:decompose_n}
+	\begin{sloppypar}A complete decomposition of a TPN $(\mathcal{N}, m_0)$ with respect to a 
+		set of flows $F_D \subseteq F$ is a finite set $D((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^n)\}$ with $\mathcal{N}_i = (E_i, E'_i,P_i, F_i, \tau_i, i \in I$ ($I$ being an index set) and 
+		a set of flows $F_D$ such that \end{sloppypar} \begin{itemize}
+		\item $\bigcap_{i=1}^n E_i = \emptyset,\bigcap_{i=1}^n P_i = \emptyset$ (no shared places and transitions between the components),
+		\item $\bigcup_{i=1}^n E_i = E, \bigcup_{i=1}^nP_i = P$, (decomposition is lossless in places and transitions),
+		\item $\forall i = 1,\ldots, n: F_i \subseteq F$, (no new flow pairs within components),
+		\item $\forall i = 1,\ldots, n: \tau_i(e) = \tau(e), e \in E_i$, (time preservation), 
+		\item $\forall i = 1,\ldots, n:  m_0^i(p) = m_0(p), p \in P_i$, (marking preservation), and, 
+		\item there exists a set of flows $F_D \subseteq F: \bigcup_{i=1}^n F_i \cup F_D = F$. 
+	\end{itemize}
+\end{mydef} \noindent The set $F_D$ is called the complementary flow set. 
+Trivially, for any given TPN a set that contains the TPN itself is a complete decomposition 
+with $F_D = \emptyset$. Furthermore, given a place $p$ we define $$I_{\bullet p} = \{i \in I \ | \ \exists e \in \bullet p(e \in E_i)  \},$$ and $$I_{p \bullet}  = \{i \in I \ | \ \exists e \in p\bullet(e \in E_i)  \}, $$
+as index sets of input and output SD nets of place $p$. 
+
+\subsection{Seize-Delay-Release Timed Petri Net}
+
+
+
+
+\begin{mydef} [Seize-Delay net] \label{def:sdnet}
+	An Seize-Delay net (SDN) is a timed Petri net, 
+	$\mathcal{N}_{SD}= (E, E' , P , F, \tau)$, such that 
+	\begin{itemize}
+		\item The set $E = \{ e_{seize}, e_{delay} \}$ contains seize and delay transitions, 
+		\item The set $E' = \{e_{delay}\}$ contains a single delay transition, 
+		\item The set $P = \{p_{delay}\}$ is a single delay place, and,
+		\item The flow $F = \{ (e_{seize}, p_{delay}), (p_{delay}, e_{delay})\}$ is as presented in Figure~\ref{fig:sd-net}.
+	\end{itemize}
+\end{mydef} 
+\todo{The timed transition itself can be a complex PN construct (hierarchy), as long as it does not
+	change resource consumption or the SD-ness of the skeleton.}
+
+\begin{figure}[t!]
+	\centering
+	\includegraphics[scale=0.3]{sd-net.png}
+	\caption{Seize-Delay Net (Definition~\ref{def:sdnet})}
+	\label{fig:sd-net}  
+	%  \vspace{-1em}
+\end{figure}
+
+
+
+\todo{Should we add that SDR TPN produces a DAG? loops make it difficult to assume precedence order}
+\begin{mydef}  [Seize-Delay-Release timed Petri net (SDR-TPN)]  \label{def:sdr-tpn}
+	\begin{sloppypar} A TPN $(\mathcal{N} = (E, E',P, F, \tau), m_0)$ is an SDR-TPN if there exists a complete decomposition (that we refer
+		to as SDR decomposition) $D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$ with the following properties: \end{sloppypar}
+	
+	\begin{enumerate} 
+		\item The components $\mathcal{N}_i, i \in I^n = \{1,\ldots, n-2\}$ are seize-delay nets with $I^n$ being their index set,
+		\item $\mathcal{N}_r$ and $\mathcal{N}_j$ are TPNs that contain only places with place sets $P_r$ and $P_a$, respectively, ($E_r = E_j = \emptyset, F_r = F_j = \emptyset$), 
+		
+		
+		\item $P_a = \{ \ p \in P \ | \ \bullet p \subseteq E' \ \land \ p\bullet \subseteq E \setminus E' \land I_{\bullet p}^n \cap I_{p \bullet}^n = \emptyset \},$
+		%\item  $P_j = \{ \ p \in P \ | \ \exists L\neq\emptyset, K\neq\emptyset \subset I \ (p\bullet \subseteq E_l \setminus E'_l, \forall l \in L \ \land \ \bullet p \subseteq E'_k, \forall k \in K \ \land \ L \cap K = \emptyset )\}$, and,
+		
+		\item $P_r = \{ \ p \in P \ |  \bullet p \subseteq E' \ \land \ p\bullet \subseteq E \setminus E' \ \land \ I_{\bullet p}^n = I_{p \bullet}^n  \land \ |\bullet p| = |p \bullet| \geq 1\}$.
+		
+		\item $\forall e \in E \setminus E'(|\{p \in P \ | \ p \in \bullet e \land p \in P_a   \}| =1)$.
+		
+	\end{enumerate}
+	
+	\noindent \todo{change to activity connectors?} The places in $P_a$ are referred to as activity connectors, while  
+	the places in $P_r$ are referred to as the resources. 
+	\label{SDRTPN}
+\end{mydef} \noindent Below, we explain Properties 3 - 5
+of the SDR decomposition. Property 3 requires 
+that
+every place in $P_a$ must connect between a subset
+of the SDNS and another (different) subset of
+SDNs. Note that TPN input places ($P_{input}$)
+satisfy the condition 
+if they are connected to a subset of SD nets.
+Similarly, TPN output places, $P_{output}$, will reside 
+in $P_a$ if their predecessors
+come from a subset of the SD nets of $D_{sdr}$. 
+Property 4 is similar to Property 3 in that
+places in $P_r$ connect between SD nets. However,
+for a place to be a resource it needs
+to connect the timed transitions of a set of SD nets
+to the immediate transition of the same set of SD nets. Clearly, 
+more than a single SDN may be connected to both 
+the activity connectors and the resources.
+Property 5 requires that every SD net of the decomposition 
+has exactly a single precondition \todo{explain why}.
+
+Furthermore, it is easy to see that the decomposition is complete with 
+respect to a complementary flow set, 
+$$F_D = \{ (x,y) \in F \ | 
+\ x\in P_a \cup P_r \lor y \in P_a \cup P_r \}.$$
+
+
+Figure~\ref{fig:sdr-net} provides an example for an SDR-TPN. Specifically, 
+it revisits the DFCI example, showing two patients who are waiting for an examination activity.
+The patients may require two subsets of resources...
+
+%Now we prove SDR-TPN -> Connected components are SD. 
+\noindent In the next part, we propose Algorithm~\ref{Alg1} that  
+takes a TPN as its input, and returns
+whether the TPN is SDR-NET; if the output is
+positive, 
+the algorithm returns
+a complete decomposition that 
+corresponds to Definition~\ref{SDRTPN}. 
+
+\noindent \todo{Go over the Algorithm line by line}
+
+
+\noindent To prove the correctness of Algorithm~\ref{Alg1},
+we shall first prove the following Lemma.
+
+\begin{mylemm} \label{lem1}
+	\begin{sloppypar}
+		Let $(\mathcal{N}, m_0)$ be an SDR-TPN with an SDR
+		decomposition $D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$ with an activity connector place set $P_a$ and resource set $P_r$. 
+		Denote $P_{sd} = \bigcup_{i\in I^n} P_i$ the union of place sets that correspond to the ($n-2$) SD nets $\mathcal{N}_i, i \in I^n$. Then, the two statements hold: \begin{enumerate}
+			\item The set $P_{sd}'$ as defined in line 2 of Algorithm~\ref{Alg2} is equal to $P_{sd}$. 
+			\item The sets $P_a'$ and $P_r'$ as returned by Algorithm~\ref{Alg2} are equal to $P_a$ and $P_r$, respectively.  
+		\end{enumerate}
+	\end{sloppypar}
+\end{mylemm}
+\begin{proof}
+	
+	First, we prove Lemma~\ref{lem1}, part 1, by means of bidirectional inclusion. 	
+	
+	\noindent Assuming that $p \in P_{sd}$, there exists
+	$i \in I^n$ (an index of an SD net) such that 
+	$|\bullet p| = |p \bullet| = 1$ (by Definition~\ref{def:sdnet}), 
+	and $$\bullet p \subseteq E_i \setminus E'_i \ \land \ p\bullet \subseteq E'_i.$$
+	Hence, $\bullet p \subseteq E \setminus E' \ \land \ p\bullet \subseteq E'$, which 
+	implies that $p \in P_{sd}'$ by definition of $P_{sd}'$ in line 2 of Algorithm~\ref{Alg2}. 
+	
+	\noindent Assuming that $p \in P_{sd}'$, 
+	$p$ satisfies the following condition (from line 2 of Algorithm~\ref{Alg1}): \begin{equation} 
+	\label{eq:sd}|\bullet p| = |p \bullet| = 1 \ \land \ \bullet p \subseteq E \setminus E' \ \land \ p\bullet \subseteq E'.\end{equation} Here, we show that every place $p \in P_a \cup P_r$ necessarily does 
+	not satisfy Eq.(\ref{eq:sd}), 
+	and hence it must be that $p \in P_i, i \in I^n$, which leads to $p \in P_{sd}$. Specifically, all non-input and non-output 
+	places in $P_a$ satisfy $\bullet p \subseteq E'$ and hence Eq.(\ref{eq:sd}) does not hold. The input and output places
+	in $P_a$ do not satisfy $|\bullet p| = |p \bullet| = 1$ (which again contradicts Eq.(\ref{eq:sd})). 
+	Furthermore, every place in $P_r$ satisfies $\bullet p \subseteq E'$ which also 
+	contradicts Eq.(\ref{eq:sd}). Hence, if $p \in P_{sd}'$ then $p \in P_i$ with 
+	$P_i$ being a place set of $\mathcal{N}_i$ (an SD net of $D_{sdr}$). This proves that
+	$p \in P_{sd}$. 
+	
+	From the proof of Lemma~\ref{lem1}, part1, we get that $P_{cand}$ from line 3 of Algorithm~\ref{Alg2} is
+	equal to $P_a \cup P_r$. This follows from the fact that places 
+	of SDR-TPN can be either in $P_{sd}$ or in $P_a \cup P_r$. Since $P_{sd}' = P_{sd}$ and $P_{cand} = P \setminus P_{sd}'$,
+	we arrive at $P_{cand} = P_a \cup P_r$. In what follows, we exploit this result to prove the second part of Lemma~\ref{lem1}, namely that $P_a' = P_a$ and $P_r' = P_r$. The proof is based on the following two claims: \begin{enumerate}
+		\item Trivially, any $p \in P_{cand}$ satisfies $p \in P_a \ \lor p \in P_r$,
+		since $p \notin P_i$ for $\mathcal{N}_i, i \in I$.
+		\item $P_r' \cap P_a = \emptyset$. We prove
+		this by showing that if $p \in P_a$ then $p \notin P_r'$, and vice versa. 
+		
+		If $p \in P_a$, then by definition we know
+		that $I_{\bullet p}^n \cap I_{p \bullet}^n = \emptyset$. This implies that 
+		transitions in $\bullet p$ and $p \bullet$ belong 
+		to two non-intersecting sets of SD constructs say $\{\mathcal{N}_k\}_{k \in I_{\bullet p}^n}$ and 
+		$\{\mathcal{N}_l\}_{l \in I_{p\bullet}^n}$, respectively. However, if $p \in P_r'$ then
+		we would get 
+		$\forall e \in \bullet p 
+		(prec(e) \cap p \bullet = \emptyset)$ (definition of $P_r'$ in line 5 of Algorithm~\ref{Alg2}),
+		which would imply that $\exists i \in I^n: i \in I_{\bullet p}^n \land i \in I_{p\bullet}^n$ which would contradict 
+		that $I_{\bullet p}^n \cap I_{p \bullet}^n = \emptyset$. Therefore, we get that if $p \in P_a$ then $p \notin P_r'$.
+		
+		If $p \in P_r'$,
+		by definition in line of Algorithm, $\forall e \in \bullet p 
+		(prec(e) \cap p \bullet = \emptyset)$. This implies that there is at least one SD net, 
+		say $\mathcal{N}_i$, such that $i \in I_{\bullet p}^n \land i \in I_{p\bullet}^n$,
+		which implies that $p \notin P_a$.
+	\end{enumerate} From these two claims we get that $P_a' = P_a$ and $P_r' = P_r$, since $P_r \cup P_a = P_r' \cup P_a'$.
+\end{proof}
+
+\noindent The correctness of Algorithm~\ref{Alg1} follows from the combination of Lemma~\ref{lem1}, and the following  proposition. 
+\begin{mythm} \label{prop:dsdr}
+	Let $(\mathcal{N} = (E, E', P, F, \tau), m_0)$ be a TPN. 
+	The decomposition $D_{sdr}'$ returned by Algorithm~\ref{Alg1} 
+	is an SDR decomposition
+	if and only if $(\mathcal{N} = (E, E', P, F, \tau), m_0)$ is an SDR-TPN.
+\end{mythm}
+
+\begin{proof} The first direction, $D_{sdr}'$ is SDR Decomposition $\Rightarrow$ SDR-TPN, follows immediately from Definition~\ref{SDRTPN}. Assume that the 
+	complete decomposition returned by Algorithm~\ref{Alg1}, namely $D_{sdr}'$, 
+	is an SDR decomposition. Since $(\mathcal{N},m_0)$ is a 
+	TPN and we found an SDR decomposition, 
+	namely $D_{sdr}'$, the TPN is SDR-TPN, according to Definition~\ref{def:sdr-tpn}. \\
+	
+	
+	\begin{sloppypar} We now prove the second direction. 
+		Assume that $(\mathcal{N} = (E, E', P, F, \tau), m_0)$ is an SDR-TPN.
+		We need to prove that $D_{sdr}'$ (returned by Algorithm~\ref{Alg1}) is 
+		an SDR decomposition of the TPN. Since $\mathcal{N}$ is an SDR-TPN, 
+		it has an SDR decomposition denoted 
+		$D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$ with the corresponding notation and 
+		conditions applying from 
+		Definition~\ref{SDRTPN}.  \end{sloppypar}
+	
+	From Lemma~\ref{lem1} we know that since $\mathcal{N}$ is an SDR-TPN,
+	the set $P_{sd}'$ computed in line 2 of Algorithm~\ref{Alg2}
+	is equal to $P_{sd}$ and that  
+	$P_a'$ and $P_r'$ as computed in lines 5-6 of 
+	Algorithm~\ref{Alg2}
+	are equal to $P_a$ and $P_r$ of $D_{sdr}$
+	(the place sets 
+	of $\mathcal{N}_j$, and $\mathcal{N}_r$), 
+	respectively.
+	
+	We are remained to prove that running 
+	connected components on the undirected representation of
+	$\mathcal{G}(\mathcal{N}_{sd})$ results in ($n-2$)
+	SD nets. This is straightforward, as 
+	$\mathcal{N}_{sd}$ (line 8 in Algorithm~\ref{Alg1}) 
+	contains all transitions and places of 
+	the SDR-TPN, except $P_a \cup P_r$, we know that it comprises ($n-2$) SD nets that 
+	are not connected among themselves.
+	
+	By definition of connected components,
+	we get that the ($n-2$) SD nets will not overlap 
+	in terms of places, transitions, and flows.
+	Furthermore, the union of places, transitions and flows, 
+	of the ($n-2$) components,
+	with $P_a', P_r', F_j', and F_r'$ will result $\mathcal{N}$. Thus, this will satisfy 
+	the first two properties in Definition~\ref{def:sdr-tpn}. Properties 3 and 4
+	are satisfied due to Lemma~\ref{lem1}, and hence we get that if 
+	$\mathcal{N}$ is an SDR-TPN, $D_{sdr}'$ is an SDR decomposition.
+\end{proof}
+
+
+
+
+\begin{mycor}
+	Given a TPN $(\mathcal{N},m_0)$, Algorithm~\ref{Alg1} is correct, i.e., if it returns $\emptyset$ then the TPN 
+	is not an SDR-TPN, and if it returns $D_{sdr}'$, then the TPN is an SDR-TPN, and $D_{sdr}'$ is an SDR decomposition.
+\end{mycor}
+\begin{proof}
+	If the algorithm returns false, $D_{sdr}'$ is not an SDR decomposition. From Proposition~\ref{prop:dsdr},
+	we get that  $(\mathcal{N},m_0)$ is not an SDR-TPN. If the algorithm returns $D_{sdr}'$, since it is an SDR decomposition
+	by construction (verified by the Algorithm), then Proposition~\ref{prop:dsdr} implies that
+	$(\mathcal{N},m_0)$ is an SDR-TPN.
+\end{proof}
+\todo{intuition: can prove uniqueness of sdr decomposition, up to the labeling of the sets}
+
+\section{Mapping SDR-TPN to BSP} 
+
+
+
+In this part, we provide a 
+mapping from Seize-Delay-Release 
+timed Petri nets (SDR-TPNs) into 
+basic scheduling problems (BSPs). Specifically, 
+given an SDR-TPN, we 
+need to create a tuple $\langle  \mathcal{A}, \mathcal{R}, \varPi, c, \rho, d, b \rangle$ that 
+is the formal representation of the corresponding BSP.
+
+For conciseness, 
+we refer to elements of the TPN 
+(e.g., places, transitions, flows)
+when defining the BSP instead of labeling the TPN
+and then using these labels to define the BSP. \todo{not sure that this needs to be said here}
+
+
+
+\begin{mydef}[SDR-TPN to BSP Mapping]
+\begin{sloppypar} Given an SDR-TPN $(\mathcal{N} = (E, E', P, F, \tau), m_0)$ 
+and its SDR decomposition 
+$D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$ with $P_a$ being the activity connector places, and $P_r$ the resource places,
+the BSP is created as follows:\end{sloppypar}
+\begin{itemize}
+	\item The resource set is equal 
+	to the resource places, $\mathcal{R} = P_r$,
+	\item Activities $\mathcal{A}$ and their precedence
+	relation $\varPi$ are constructed using Algorithm~\ref{ConstructActPrec},
+	\item resource capacities are equal to the 
+	initial marking
+	of resource places, $\forall r \in \mathcal{R}: c(r) = m_0(p_r)$, and finally, 
+	\item the RTAA and the duration functions $\rho, d, b$ are computed using Algorithm~\ref{ConstructRhoDur}.	
+\end{itemize} 
+\end{mydef}
+
+
+
+Define SDR-TPN without resource places. Then aggregation over SDR-TPN without resource places, 
+according to xor splits into an activity diagram. Then, one can use connected components and then strongly
+connected components to elicit precedence. 
+
+
+
+
+The idea is that every pair $a, R: R \in \rho(a)$ 
+should correspond to one transition (SD construct). 
+
+
+
+
+
+
+
+
+
+
+
+
+%\begin{mydef} [Conflicting Place; Conflict-Free TPN; Time Conflict-Free TPN] \label{def:conf_p}
+%	Given a TPN $\mathcal{N}$, a place $p \in P$ is said to be conflicting if $|O_t(p)|>1$. 
+%	The subset of conflicting places in a TPN is denoted $P_c \subseteq P$. A TPN 
+%	for which $P_c = \emptyset$ is 
+%	said to be conflict-free. If $\forall p \in P_c, O_t(p) \subseteq 
+%	E\setminus E'$ then 
+%	the TPN is a Time Conflict-Free TPN. 
+%\end{mydef} 
+
+%\begin{mydef} [Branching Transitions; Branch-Free TPN; Time Branching TPN] \label{def:branch_e}
+%	Given a TPN $\mathcal{N}$, a transition $e \in E$ is said to be branching if $|O_p(e)|>1$. 
+%	The subset of branching transitions in a TPN is denoted $E_b \subseteq E$. A TPN 
+%	for which $E_b = \emptyset$ is 
+%	said to be branch-free. If $\forall e \in E_b: e \in E'$ then 
+%	the TPN is said to be a Time Branching TPN. 
+%\end{mydef} 
+%
+%\begin{mydef} [Joining Transitions; Join-Free TPN; Immediate Joining TPN] \label{def:join_e}
+%	Given a TPN $\mathcal{N}$, a transition $e \in E$ is said to be joining if $|I_p(e)|>1$. 
+%	The subset of branching transitions in a TPN is denoted $E_j \subseteq E$. A TPN 
+%	for which $E_j = \emptyset$ is 
+%	said to be join-free. If $\forall e \in E_j: e \in E \setminus E'$ then 
+%	the TPN is said to be an Immediate Joining TPN. 
+%\end{mydef} 
+%
+%\todo{Not sure if we need the state machine definition here - but maybe for more complex problems}
+%
+%\begin{mydef} [State Machine]
+%	A TPN $\mathcal{N}$ is a state-machine if it is branch-free and join-free.	
+%\end{mydef} State machines allow for choices (conflicts), 
+%but do not allow for concurrency. Verifying that a Petri net is a state machine is polynomial in the number of transitions.  
+
+%\noindent Next, we turn to characterize transition types and constructs in TPN.
+%\begin{mydef} [Seize; Delay; Delay-Release; D-SDR Net Net] \label{def:types_e}
+%	Given a Time Branching and an Immediate Joining TPN $\mathcal{N}$, a transition $e \in E$ is said to be: \begin{itemize}
+%	\item a seize transition $\iff e \in E \setminus E'$ (an immediate transition),
+%	\item a delay transition $\iff e \in E' \setminus E_b$ (timed; no branching),
+%	\item a delay-release transition $\iff e \in E_b$ (timed; branching).
+%\end{itemize} 
+%\end{mydef} 
+%
+
+
+
+
+
+
+
+
+\bibliographystyle{plainnat}
+\bibliography{Biblio}
+\newpage
+
+\section{Appendix A: Algorithms}
+
+
+
+\begin{algorithm}[h!]
+	
+	\LinesNumbered
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\KwIn{TPN System $(\mathcal{N} = (E, E',P, F, \tau), m_0)$}
+	\KwOut{Decomposition $D_{sdr}((\mathcal{N}, m_0))$ or $\emptyset$}
+	\Begin{
+		
+		\tcc{Step 1: Find the candidates to be activity connectors and resources and detatch them from the net. The function CandidateActivityConnectorsResources()
+			takes a TPN and returns two sets (activity and resource sets) that 
+			have the potential to satisfy conditions (3a) and (3b). (see Algorithm~\ref{Alg2})}
+		
+		$P_a', P_r' \leftarrow$ \emph{CandidateActivityConnectorsResources}($\mathcal{N}$);\\	
+		$F_j' = \{(x,y) \in F | x\in P_a' \lor y \in P_a'  \}$;\\
+		$F_r' = \{(x,y) \in F | x\in P_r' \lor y \in P_r'  \}$;\\
+		
+		
+		$F_{sd}  = F \setminus (F_j' \cup F_r')$;\\
+		$P_{sd} = P\setminus (P_a' \cup P_r')$;\\
+		$E_{sd} = E$; $E'_{sd} = E'$; $\forall e \in \tau_{sd}(e) = \tau(e)$;\\
+		$\mathcal{N}_{sd} = (E_{sd}, E'_{sd}, P_{sd}, F_{sd}, \tau_{sd})$;\\
+		
+		\tcc{Step 2: The function ConnectedComponents takes the 
+			graph representation of TPN, $\mathcal{G}(\mathcal{N}_{sd})$, and returns $m$
+			Petri nets that correspond to the connected components of the graph.}
+		$G_{sd} = \mathcal{G}(\mathcal{N}_{sd})$;\\
+		$\{\mathcal{N}_i'\}_{i=1}^{m}$ = \emph{ConnectedComponents}(\emph{Undirected}($G_{sd}$);\\
+		
+		\tcc{Step 3: The function ConstructDecomposition() takes the connected components, along 
+			with the initial marking and the sets $P_a'$ and $P_r'$ and constructs
+			a complete decomposition of size $m+2$.}
+		
+		$D_{sdr}' = $\emph{ConstructDecomposition}($\{\mathcal{N}_i'\}_{i=1}^{m}, m_0, P_a', P_r'$) \;
+		
+		\tcc{Step 4: The boolean function VerifySDEDecomposition() takes a complete TPN decomposition and 
+			checks whether it is SDR based on the four properties of Definition~\ref{def:sdr-tpn}.}
+		
+		\uIf{\emph{VerifySDRDecomposition}($D_{sdr}'$) = True}
+				{\Return $D_{sdr}'$ \; }
+				\Else{ \Return $\emptyset$\;}
+			
+	}
+	\caption{Checks if TPN is an SDR-TPN and return a complete decomposition.}
+	\label{Alg1}
+\end{algorithm}
+
+\begin{algorithm}[t!]
+	
+	\LinesNumbered
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\KwIn{TPN $\mathcal{N} = (E, E',P, F, \tau)$}
+	\KwOut{Two sets: $P_a'$ and $P_r'$.}
+	\Begin{
+		
+		\tcc{Detect all seize-delay places. Deduce candidates to be activity connectors or resource places.}
+		$P_{sd} = \{p \in P \ | \ |\bullet p| = |p \bullet| = 1 \ \land \ \bullet p \subseteq E \setminus E' \ \land \ p\bullet \subseteq E'\}$;\\
+		$P_{cand} = P \setminus P_{sd}$;\\
+		
+		$\forall e: prec(e) = \{ e' \in E \ | \ \exists p\in P ((e',p) \in F) \ \land \ (p,e) \in F \}$;\\	
+		
+		\tcc{Divide the candidates into two sets: resource places that connect transitions from... and activity connectors.}
+		
+		$P_r' = \{ p \in P_{cand} \ | \ \bullet p \neq \emptyset \ \land \ p\bullet \neq \emptyset \ \land \ \forall e \in \bullet p ( \ prec(e) \subseteq p \bullet \ )\}$;\\
+		$P_a' = P_{cand} \setminus P_r'$;\\
+		\Return $P_a', P_r'$;\\
+	}
+	\caption{Returns candidate place sets for activity connectors and resources.}
+	\label{Alg2}
+\end{algorithm}
+
+
+
+
+\begin{algorithm}[t!]
+	
+	\LinesNumbered
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\KwIn{SDR-TPN $(\mathcal{N} = (E, E', P, F, \tau), m_0)$, SDR decomposition 
+		$D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$, $P_a$, $P_r$.}
+	\KwOut{Set of activities and precedence order, $\mathcal{A}, \varPi$.}
+	\Begin{
+		
+		\tcc{Find activities from sets of SD constructs with
+			joint input place. Every input place 
+			into an SD construct corresponds to one activity.}
+		$\mathcal{A} = \{p \in P \ | \ \exists \ e \in E \setminus E'(p \in \bullet e) \}$;\\
+		\tcc{Create a new without resource places and flows between resources places and 
+			SD constructs. The function $Follows(G, a, a')$ returns True if
+			there is a path from $a$ to $a'$ in a directed graph $G$.}
+		$F_r = \{(x,y) \in F | x\in P_r \lor y \in P_r  \}$;\\
+		$\mathcal{N}'= (E, E', P \setminus P_r, F \setminus F_r, \tau), m_0)$;\\
+		$\varPi = \{(a,a') \in \mathcal{A} \times \mathcal{A} \ | \ Follows(\mathcal{G}(\mathcal{N}'), a, a')  =True$ \};\\
+		\Return $\mathcal{A}, \varPi$;\\
+	
+	}
+	\caption{Constructs activity set $\mathcal{A}$ and precedence relation $\varPi$.}
+	\label{ConstructActPrec}
+\end{algorithm}
+
+
+
+
+
+
+\begin{algorithm}[t!]
+	
+	\LinesNumbered
+	\DontPrintSemicolon
+	\SetAlgoLined
+	\KwIn{SDR-TPN $(\mathcal{N} = (E, E', P, F, \tau), m_0)$, SDR decomposition 
+		$D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$, $P_a$, $P_r$, set of activities $\mathcal{A}$, 
+		set of resources $\mathcal{R}$.}
+	\KwOut{Function $\rho$ and partial functions $d,b$.}
+	\Begin{
+		
+		\tcc{Go over the activities, and check which of the resources is connected, per execution mode.}
+		\For{$e \in E \setminus E'$}{$R(e) = \{r \in P_r \ | \ (r,e) \in F  \}$;\\}
+		\For{$a \in \mathcal{A}$}{$\rho(a) = \{ R(e) \ | \ (a,e) \in F \}$;\\}
+		\tcc{Retrieve the SD net that corresponds to a combination of $a$ and $R$.}
+
+		
+		
+		\For{$a \in A$}{
+		\For{$R \in \rho(a)$}{
+		$i(a,R) = \forall i \in I^n(\exists e \in E_i((a,e) \in F))$;\\
+		$d(a, R) = \{ \tau(e') \ | \ e' \in E'_{i(a,R)}  \}$;\\}}
+		
+			\Return $\rho, d, b$;\\	
+	}
+
+	\caption{Constructs: RTAA function, duration partial function, and demand partial function.}
+	\label{ConstructRhoDur}
+\end{algorithm}
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+
+
+
+

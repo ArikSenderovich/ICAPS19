@@ -1,0 +1,232 @@
+\def\year{2019}
+%File: formatting-instruction.tex
+\documentclass[letterpaper]{article}
+\usepackage{aaai19}
+\usepackage{paralist}
+\usepackage{graphicx, color}
+%\usepackage{subfigure}
+\usepackage{booktabs}
+%\usepackage{caption}
+%\usepackage{subcaption}
+\usepackage{paralist}
+\usepackage{amssymb, amsmath, amsthm, amsfonts} 
+\newtheorem{myProb}{Problem}
+%\usepackage[ruled]{algorithm2e}
+%\usepackage[colorinlistoftodos]{todonotes}
+%\usepackage{todonotes}
+%\usepackage{Algorithmic}
+% include custom modifications
+%\usepackage{_style/review}
+% \usepackage{subfigure}
+%\newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}
+%\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+%\usepackage[ruled]{algorithm2e}
+\graphicspath{{./Figures/}}
+%\documentclass{llncs}
+%\usepackage[ruled]{algorithm2e}
+%\usepackage{Algorithmic}
+%\usepackage{times}
+\usepackage{multirow}
+\usepackage{subfig}
+\usepackage{microtype}
+%\usepackage{url}
+\usepackage{balance}
+\usepackage{graphicx, color}
+%\usepackage{subfigure}
+%\usepackage{wrapfig}
+%\usepackage{paralist}
+\usepackage[draft]{hyperref}
+%\let\proof\relax 
+%\let\endproof\relax
+\newtheorem{mydef}{Definition}
+\usepackage{mwe}
+
+%\usepackage{amssymb, amsmath,amsthm} 
+\usepackage{relsize}
+\usepackage{pdflscape}
+\usepackage{comment}
+\usepackage[ruled]{algorithm2e}
+\newtheorem{mylemm}{Lemma}
+\newcommand{\mypar}[1]{\smallskip\noindent\textbf{#1.}}
+\setcounter{secnumdepth}{3}
+\newcommand{\todo}[1]{\textcolor{red}{\bf {#1}}}
+%\usepackage[document]{ragged2e}
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\newtheorem{mycor}{Corollary}
+\newtheorem{mythm}{Theorem}
+\newtheorem{myprop}{Proposition}
+%
+% paper title
+% Titles are generally capitalized except for words such as a, an, and, as,
+% at, but, by, for, in, nor, of, on, or, the, to and up, which are usually
+% not capitalized unless they are the first or last word of the title.
+% Linebreaks \\ can be used within to get better formatting as desired.
+% Do not put math or special symbols in the title.
+\begin{document}
+	
+\title{Learning Scheduling Models from Event Data}
+
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+%\author{\authorblockN{Arik Senderovich, Kyle E.C. Booth,
+%		J. Christopher Beck} \authorblockA{Argh}}
+\author{removed for review\vspace{3.4em}}
+%\author{\IEEEauthorblockN{Arik Senderovich\IEEEauthorrefmark{1},
+%		Matthias Weidlich\IEEEauthorrefmark{2}, and
+%		Avigdor Gal\IEEEauthorrefmark{1}}
+%	\IEEEauthorblockA{\IEEEauthorrefmark{1}Technion -- Israel Institute of 
+%	Technology\\ 
+%						Emails: sariks,avigal@technion.ac.il}
+%	\IEEEauthorblockA{\IEEEauthorrefmark{2}Humboldt University zu Berlin\\
+%			Email: matthias.weidlich@hu-berlin.de}}
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+
+
+% no keywords
+
+
+
+
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
+% \fi
+%
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+%\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+\input{Intro}
+
+\section{Background}
+\input{Preliminaries}
+
+
+
+%
+%\section{Solution Overview}
+%\input{Solution}
+
+\section{Schedule-Driven Petri Nets}
+\input{PNtoSched}
+
+\section{Transforming SDPN to CP Models}
+\input{TPN2CP}
+
+
+\section{Evaluation}
+\input{Evaluation}
+
+
+
+\section{Related Work}
+\input{RelWork}
+
+\section{Conclusion}
+\input{Conclusion}
+
+\bibliographystyle{aaai}
+\bibliography{Biblio}
+
+
+%\appendix{Algorithms}
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%\begin{algorithm}[t!]
+%	
+%	\LinesNumbered
+%	\DontPrintSemicolon
+%	\SetAlgoLined
+%	\KwIn{SDR-TPN $(\mathcal{N} = (E, E', P, F, \tau), m_0)$, SDR decomposition 
+%		$D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$, $P_a$, $P_r$.}
+%	\KwOut{Set of activities and precedence order, $\mathcal{A}, \varPi$.}
+%	\Begin{
+%		
+%		\tcc{Find activities from sets of SD constructs with
+%			joint input place. Every input place 
+%			into an SD construct corresponds to one activity.}
+%		$\mathcal{A} = \{p \in P \ | \ \exists \ e \in E \setminus E'(p \in \bullet e) \}$;\\
+%		\tcc{Create a new without resource places and flows between resources places and 
+%			SD constructs. The function $Follows(G, a, a')$ returns True if
+%			there is a path from $a$ to $a'$ in a directed graph $G$.}
+%		$F_r = \{(x,y) \in F | x\in P_r \lor y \in P_r  \}$;\\
+%		$\mathcal{N}'= (E, E', P \setminus P_r, F \setminus F_r, \tau), m_0)$;\\
+%		$\varPi = \{(a,a') \in \mathcal{A} \times \mathcal{A} \ | \ Follows(\mathcal{G}(\mathcal{N}'), a, a')  =True$ \};\\
+%		\Return $\mathcal{A}, \varPi$;\\
+%		
+%	}
+%	\caption{Constructs activity set $\mathcal{A}$ and precedence relation $\varPi$.}
+%	\label{ConstructActPrec}
+%\end{algorithm}
+%
+%
+%
+%
+%
+%
+%\begin{algorithm}[t!]
+%	
+%	\LinesNumbered
+%	\DontPrintSemicolon
+%	\SetAlgoLined
+%	\KwIn{SDR-TPN $(\mathcal{N} = (E, E', P, F, \tau), m_0)$, SDR decomposition 
+%		$D_{sdr}((\mathcal{N}, m_0)) = \{(\mathcal{N}_1, m_0^1), \ldots, (\mathcal{N}_n, m_0^{n-2}) , (\mathcal{N}_r, m_0^{r}), (\mathcal{N}_j, m_0^{j})\}$, $P_a$, $P_r$, set of activities $\mathcal{A}$, 
+%		set of resources $\mathcal{R}$.}
+%	\KwOut{Function $\rho$ and partial functions $d,b$.}
+%	\Begin{
+%		
+%		\tcc{Go over the activities, and check which of the resources is connected, per execution mode.}
+%		\For{$e \in E \setminus E'$}{$R(e) = \{r \in P_r \ | \ (r,e) \in F  \}$;\\}
+%		\For{$a \in \mathcal{A}$}{$\rho(a) = \{ R(e) \ | \ (a,e) \in F \}$;\\}
+%		\tcc{Retrieve the SD net that corresponds to a combination of $a$ and $R$.}
+%		
+%		
+%		
+%		\For{$a \in A$}{
+%			\For{$R \in \rho(a)$}{
+%				$i(a,R) = \forall i \in I^n(\exists e \in E_i((a,e) \in F))$;\\
+%				$d(a, R) = \{ \tau(e') \ | \ e' \in E'_{i(a,R)}  \}$;\\}}
+%		
+%		\Return $\rho, d, b$;\\	
+%	}
+%	
+%	\caption{Constructs: RTAA function, duration partial function, and demand partial function.}
+%	\label{ConstructRhoDur}
+%\end{algorithm}
+%
+%
+
+
+
+
+%\balance
+%\newpage
+
+
+
+
+\end{document}
+
+

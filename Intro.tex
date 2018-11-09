@@ -1,0 +1,114 @@
+\label{sec:introduction}
+
+Modern scheduling algorithms 
+successfully solve
+problems with thousands of
+activities, complex temporal constraints,
+and scarce resources. The main two prerequisites to 
+solving scheduling problems are 
+(1) a mathematical
+model that describes the system
+and (2) an algorithm that 
+solves the problem based on the aforementioned model.
+
+In deterministic scheduling,
+Constraint Programming (CP) has been shown to 
+be extremely effective in solving a wide range
+of problems~\cite[Chapter 6]{Baptiste:2001},~\cite{lallouet2010learning}.  
+However, creating CP
+models  
+often requires 
+a high level
+of expertise, as one must specify 
+suitable variables, constraints and objective
+functions that 
+correspond to the underlying real-world problem~\cite{lallouet2010learning}. 
+
+In this work, we address the challenge
+of automating 
+the process of modeling scheduling problems
+by learning CP models from data. Previous works
+that learn CP models 
+assume that the data is tightly coupled 
+with the CP formulation. 
+For example, when learning from positive
+examples only, the data at hand must contain
+variables as they appear in CP models~\cite{beldiceanu2012model}. In other works,
+it is assumed that
+the data must include 
+both positive and negative labels for
+assignments that satisfy 
+or violate constraints, respectively~\cite{lallouet2010learning}. 
+
+In practice, for many real-world problems
+existing data recordings do not 
+relate to the CP formalism (e.g., does
+not include variables). Instead, the data comes in the form of 
+event logs,
+which are logs that contain the activities that 
+were executed, along with their 
+start and completion times,
+and 
+information on resource consumptions~\cite[Chapter 4]{AalstBook}.
+In this work, we address the challenge of learning 
+scheduling models 
+automatically from event logs without humans intervention.
+ \begin{figure*}[t!]
+	\centering
+	\includegraphics[scale= 0.8]{Approach.pdf}
+	\vspace{-0.5em}
+	\caption{Our solution to learning scheduling models.}
+	\label{fig:overview}
+	%  \vspace{-0.8em}
+\end{figure*}
+Figure~\ref{fig:overview} presents an overview of our approach.
+As our first step, we use existing techniques from process mining,
+a rapidly developing
+research field that aims at learning models
+of the underlying process 
+from event logs~\cite{AalstBook}. Specifically,
+we apply a model learning method
+that considers scheduled processes and their execution data~\cite{SenderovichRGMM15}. The result of the 
+process mining step is a 
+timed Petri net (TPN), a well-known formalism
+for modeling dynamic schedule-driven systems~\cite{van1996petri}.
+Since the TPN is highly expressive and 
+captures synchronization, resource consumption, and temporal constraints, it cannot be used efficiently 
+for scheduling the system that it models~\cite{van1996petri}. 
+Therefore, in the next step we transform the learned 
+TPN into a CP model. 
+However, due to differences in the expressive power
+of the two formalisms (TPN and CP), we must 
+restrict the TPN to a family of models that can be 
+transformed into CP formulations. To this end, we define a 
+new type of TPNs, namely Seize-Delay-Release nets with resources (SDRR nets). We show a correct and complete algorithm that given a TPN verifies that it is an SDRR net. Subsequently, if the 
+TPN is an SDRR net, we provide a 
+correct and complete mapping of the SDRR net into a CP model,
+thus completing our solution to learning CP models from event data. 
+ 
+
+
+The main contribution of our work is threefold: \begin{itemize}
+\item We provide an data-to-model solution that learns scheduling models from event logs.
+\item We introduce a specialized type of timed Petri nets, namely
+the SDRR nets, which enables a TPN to CP transformation. 
+\item We show a correct and complete algorithm for verifying
+that a TPN is an SDRR net
+and provide a mapping of SDRR nets into CP models.
+
+\end{itemize}
+
+To demonstrate the usefulness of our approach,
+we provide a two-part experimental evaluation.
+In the first part, we learn 
+models of job-shop scheduling
+benchmarks using 
+synthetically generated data. In the second part of the evaluation,
+we learn scheduling models from real-world data
+coming from a large outpatient cancel hospital in the United States. 
+Given the data, our algorithms generate
+the underlying appointment scheduling problem 
+that we consequently solve 
+using constraint programming.
+
+ 
